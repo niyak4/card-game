@@ -28,8 +28,8 @@ Web platform for board games. The main idea is to develop a ready-made base for 
 
 ### Security:
 - [ ] Implement cookies to avoid user session compromise.
-- [ ] Allow only one active session per user
-        (if user_id is already in active_sessions -> fail login (or disable the first session and let login with a new one))
+- [x] Allow only one active session per user.
+        (if user_id is already in active_sessions -> revoke the first session and create a new one)
 - [ ] ---
 
 ## Contribution

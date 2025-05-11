@@ -3,336 +3,35 @@
         "type": "chat_message",
         "permanent_user_id": "user_6cy7w525vo",
         "sender": "1",
-        "text": "111",
-        "timestamp": 1746829073.706122
-    },
-    {
-        "type": "chat_message",
-        "permanent_user_id": "user_dou13iygs0",
-        "sender": "123",
-        "text": "222",
-        "timestamp": 1746829076.925389
+        "text": "1111",
+        "timestamp": 1746973713.1365738
     },
     {
         "type": "chat_message",
         "permanent_user_id": "user_6cy7w525vo",
         "sender": "1",
-        "text": "333",
-        "timestamp": 1746829079.3182766
-    },
-    {
-        "type": "chat_message",
-        "permanent_user_id": "user_yqxrxkvoin",
-        "sender": "333",
-        "text": "asdasd",
-        "timestamp": 1746829089.706688
-    },
-    {
-        "type": "chat_message",
-        "permanent_user_id": "user_dou13iygs0",
-        "sender": "123",
-        "text": "asdasd",
-        "timestamp": 1746829306.9908516
-    },
-    {
-        "type": "chat_message",
-        "permanent_user_id": "user_dou13iygs0",
-        "sender": "123",
-        "text": "wadwasd",
-        "timestamp": 1746829308.442874
-    },
-    {
-        "type": "chat_message",
-        "permanent_user_id": "user_dou13iygs0",
-        "sender": "123",
-        "text": "wadasdaw",
-        "timestamp": 1746829309.3641677
+        "text": "фів",
+        "timestamp": 1746974077.6840396
     },
     {
         "type": "chat_message",
         "permanent_user_id": "user_6cy7w525vo",
         "sender": "1",
-        "text": "asdawd",
-        "timestamp": 1746829353.1588862
-    },
-    {
-        "type": "chat_message",
-        "permanent_user_id": "user_dou13iygs0",
-        "sender": "123",
-        "text": "asdas",
-        "timestamp": 1746829362.6972082
-    },
-    {
-        "type": "chat_message",
-        "permanent_user_id": "user_dou13iygs0",
-        "sender": "123",
-        "text": "asdad",
-        "timestamp": 1746829369.0484898
-    },
-    {
-        "type": "chat_message",
-        "permanent_user_id": "user_yqxrxkvoin",
-        "sender": "333",
-        "text": "asdasdwa",
-        "timestamp": 1746829373.5726159
-    },
-    {
-        "type": "chat_message",
-        "permanent_user_id": "user_dou13iygs0",
-        "sender": "123",
-        "text": "asdasd",
-        "timestamp": 1746829377.0742607
-    },
-    {
-        "type": "chat_message",
-        "permanent_user_id": "user_dou13iygs0",
-        "sender": "123",
-        "text": "asdasd",
-        "timestamp": 1746829378.613247
-    },
-    {
-        "type": "chat_message",
-        "permanent_user_id": "user_dou13iygs0",
-        "sender": "123",
-        "text": "asdasd",
-        "timestamp": 1746829388.8774085
-    },
-    {
-        "type": "chat_message",
-        "permanent_user_id": "user_dou13iygs0",
-        "sender": "123",
-        "text": "asdasd",
-        "timestamp": 1746829391.4444163
-    },
-    {
-        "type": "chat_message",
-        "permanent_user_id": "user_dou13iygs0",
-        "sender": "123",
-        "text": "asdasd",
-        "timestamp": 1746829392.3154693
-    },
-    {
-        "type": "chat_message",
-        "permanent_user_id": "user_dou13iygs0",
-        "sender": "123",
-        "text": "asd",
-        "timestamp": 1746829392.5953457
-    },
-    {
-        "type": "chat_message",
-        "permanent_user_id": "user_dou13iygs0",
-        "sender": "123",
-        "text": "asd",
-        "timestamp": 1746829392.7597523
-    },
-    {
-        "type": "chat_message",
-        "permanent_user_id": "user_dou13iygs0",
-        "sender": "123",
-        "text": "as",
-        "timestamp": 1746829392.925371
-    },
-    {
-        "type": "chat_message",
-        "permanent_user_id": "user_dou13iygs0",
-        "sender": "123",
-        "text": "ds",
-        "timestamp": 1746829393.0815117
-    },
-    {
-        "type": "chat_message",
-        "permanent_user_id": "user_dou13iygs0",
-        "sender": "123",
-        "text": "s",
-        "timestamp": 1746829393.243879
-    },
-    {
-        "type": "chat_message",
-        "permanent_user_id": "user_dou13iygs0",
-        "sender": "123",
-        "text": "s",
-        "timestamp": 1746829393.4024823
-    },
-    {
-        "type": "chat_message",
-        "permanent_user_id": "user_dou13iygs0",
-        "sender": "123",
-        "text": "s",
-        "timestamp": 1746829393.5670881
-    },
-    {
-        "type": "chat_message",
-        "permanent_user_id": "user_dou13iygs0",
-        "sender": "123",
-        "text": "s",
-        "timestamp": 1746829393.708999
-    },
-    {
-        "type": "chat_message",
-        "permanent_user_id": "user_dou13iygs0",
-        "sender": "123",
-        "text": "s",
-        "timestamp": 1746829393.8584526
-    },
-    {
-        "type": "chat_message",
-        "permanent_user_id": "user_dou13iygs0",
-        "sender": "123",
-        "text": "s",
-        "timestamp": 1746829394.010327
-    },
-    {
-        "type": "chat_message",
-        "permanent_user_id": "user_yqxrxkvoin",
-        "sender": "333",
-        "text": "123",
-        "timestamp": 1746829600.096826
-    },
-    {
-        "type": "chat_message",
-        "permanent_user_id": "user_yqxrxkvoin",
-        "sender": "333",
-        "text": "123",
-        "timestamp": 1746829601.541837
-    },
-    {
-        "type": "chat_message",
-        "permanent_user_id": "user_yqxrxkvoin",
-        "sender": "333",
-        "text": "123",
-        "timestamp": 1746829602.0428803
-    },
-    {
-        "type": "chat_message",
-        "permanent_user_id": "user_dou13iygs0",
-        "sender": "123",
-        "text": "123",
-        "timestamp": 1746830779.6531334
-    },
-    {
-        "type": "chat_message",
-        "permanent_user_id": "user_dou13iygs0",
-        "sender": "123",
-        "text": "123",
-        "timestamp": 1746830780.1828191
-    },
-    {
-        "type": "chat_message",
-        "permanent_user_id": "user_dou13iygs0",
-        "sender": "123",
-        "text": "123",
-        "timestamp": 1746830780.6055655
-    },
-    {
-        "type": "chat_message",
-        "permanent_user_id": "user_dou13iygs0",
-        "sender": "123",
-        "text": "123",
-        "timestamp": 1746830780.9416647
-    },
-    {
-        "type": "chat_message",
-        "permanent_user_id": "user_dou13iygs0",
-        "sender": "123",
-        "text": "HELLO PUSSY",
-        "timestamp": 1746831160.5695987
-    },
-    {
-        "type": "chat_message",
-        "permanent_user_id": "user_8ck6glbx8f",
-        "sender": "555",
-        "text": "asdasd",
-        "timestamp": 1746831211.277075
-    },
-    {
-        "type": "chat_message",
-        "permanent_user_id": "user_8ck6glbx8f",
-        "sender": "555",
-        "text": "привет хуй",
-        "timestamp": 1746831507.9810963
-    },
-    {
-        "type": "chat_message",
-        "permanent_user_id": "user_aeesukopmw",
-        "sender": "666",
-        "text": "hi",
-        "timestamp": 1746831513.8140113
+        "text": "фівфів",
+        "timestamp": 1746974177.6506023
     },
     {
         "type": "chat_message",
         "permanent_user_id": "user_6cy7w525vo",
         "sender": "1",
-        "text": "asdasd",
-        "timestamp": 1746833410.5167408
+        "text": "фыв",
+        "timestamp": 1746974690.276098
     },
     {
         "type": "chat_message",
         "permanent_user_id": "user_6cy7w525vo",
         "sender": "1",
-        "text": "qweqwe",
-        "timestamp": 1746833412.3269124
-    },
-    {
-        "type": "chat_message",
-        "permanent_user_id": "user_6cy7w525vo",
-        "sender": "1",
-        "text": "asdwqd",
-        "timestamp": 1746833414.4668071
-    },
-    {
-        "type": "chat_message",
-        "permanent_user_id": "user_6cy7w525vo",
-        "sender": "1",
-        "text": "11111",
-        "timestamp": 1746833417.9109375
-    },
-    {
-        "type": "chat_message",
-        "permanent_user_id": "user_6cy7w525vo",
-        "sender": "1",
-        "text": "asdasd",
-        "timestamp": 1746833420.884977
-    },
-    {
-        "type": "chat_message",
-        "permanent_user_id": "user_6cy7w525vo",
-        "sender": "1",
-        "text": "adsdasd",
-        "timestamp": 1746833427.2423427
-    },
-    {
-        "type": "chat_message",
-        "permanent_user_id": "user_6cy7w525vo",
-        "sender": "1",
-        "text": "awdwd",
-        "timestamp": 1746833429.6919582
-    },
-    {
-        "type": "chat_message",
-        "permanent_user_id": "user_6cy7w525vo",
-        "sender": "1",
-        "text": "pidaras",
-        "timestamp": 1746833432.725193
-    },
-    {
-        "type": "chat_message",
-        "permanent_user_id": "user_dou13iygs0",
-        "sender": "123",
-        "text": "111",
-        "timestamp": 1746833493.9929438
-    },
-    {
-        "type": "chat_message",
-        "permanent_user_id": "user_yqxrxkvoin",
-        "sender": "333",
-        "text": "222",
-        "timestamp": 1746833496.5527914
-    },
-    {
-        "type": "chat_message",
-        "permanent_user_id": "user_6cy7w525vo",
-        "sender": "1",
-        "text": "333",
-        "timestamp": 1746833498.2441473
+        "text": "фыв",
+        "timestamp": 1746974692.2001185
     }
 ]

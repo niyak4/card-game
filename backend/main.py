@@ -76,27 +76,29 @@ async def lifespan(app: FastAPI): # Renamed and added app argument type hint
     Handles application startup and shutdown events.
     Loads data on startup.
     """
-    print("App lifespan event: Loading data on startup...")
+    print("Loading data on startup...")
     global chat_history, users_data, active_sessions
     chat_history = load_data(CHAT_HISTORY_FILE, [])
     users_data = load_data(USERS_FILE, {})
     active_sessions = load_data(SESSIONS_FILE, {})
     print(f"Loaded {len(active_sessions)} active sessions from {SESSIONS_FILE}")
 
-    # --- Startup Logic Ends ---
-    # The 'yield' statement is the separator between startup and shutdown logic.
-    # The application will run while inside the 'async with' block before 'yield'.
     yield
-    # --- Shutdown Logic Starts (Optional) ---
-    # Code after 'yield' will be executed when the application is shutting down.
-    # This is where you would clean up resources, like closing database connections.
-    # For file-based storage, explicit saving on shutdown might be redundant
-    # if you already save on every change, but could be added here as a final save.
-    print("App lifespan event: Application shutting down.")
-    # save_chat_history() # Optional final saves
-    # save_users_data()
-    # save_active_sessions()
-    # print("App lifespan event: Data saved on shutdown.")
+
+    print("Application shutting down.")
+
+    print("Clearing active sessions...")
+    active_sessions = {}
+
+    try:
+        os.remove(SESSIONS_FILE)
+        print(f"Successfully removed {SESSIONS_FILE}")
+    except FileNotFoundError:
+        print(f"{SESSIONS_FILE} not found, nothing to remove.")
+    except Exception as e:
+        print(f"Error removing {SESSIONS_FILE}: {e}")
+
+    save_chat_history()
 
 app = FastAPI(lifespan=lifespan)
 
@@ -271,11 +273,11 @@ class ConnectionManager:
             player_name = self.active_players[session_id].name # Get name before removing
             permanent_user_id = self.active_players[session_id].permanent_user_id
 
-            # Optional: Try to close the websocket cleanly
+            # Try to close the websocket cleanly
             try:
                 websocket = self.active_players[session_id].websocket
                 if websocket.client_state != websockets.enums.ClientState.CLOSED:
-                    await websocket.close(code=1000, reason="Disconnected by server")
+                    await websocket.close(code=1000, reason="Disconnected by server")  # Explicitly close
             except Exception as e:
                 print(f"Error closing websocket for session {session_id} during disconnect: {e}")
 
@@ -327,48 +329,20 @@ class ConnectionManager:
 manager = ConnectionManager()
 
 
-# --- HTTP Endpoint for Login Page (Root) ---
-# Accessing the root URL "/" serves the login.html page.
+# --- HTTP Endpoint for Root Page ---
 @app.get("/", response_class=HTMLResponse)
+async def root():
+    return RedirectResponse(url="/login")
+
+
+@app.get("/login", response_class=HTMLResponse)
 async def get_login_page(request: Request):
     # Ideally, here you'd check for a valid session cookie. If found,
     # redirect directly to /chat. For simplicity, always serve login page for now.
     return templates.TemplateResponse("login.html", {"request": request})
 
-# --- HTTP Endpoint for Chat Page ---
-# Accessing "/chat" serves the chat.html page, but REQUIRES a valid session_id.
-@app.get("/chat", response_class=HTMLResponse)
-async def get_chat_page(request: Request):
-    # Get session_id from query parameter (as sent by login.html redirect)
-    session_id = request.query_params.get("session_id")
 
-    # --- NEW: Validate the session_id on the server side ---
-    # Check if the provided session_id is currently active according to our loaded/saved sessions
-    permanent_user_id = get_user_id_from_session_id(session_id)
-
-    if not session_id or not permanent_user_id:
-        # If session_id is missing, invalid, or not in our active_sessions
-        print(f"Access to /chat denied: Invalid or missing session_id: {session_id}. Redirecting to login.")
-        # Redirect back to login page
-        # Add a message parameter to login page if needed? e.g., /?error=invalid_session
-        return RedirectResponse(url="/", status_code=302) # 302 Found (Temporary Redirect)
-
-
-    # If session ID is valid and found in active_sessions, render the chat page.
-    # Pass the session_id to the template so the frontend JS knows how to connect to WebSocket.
-    print(f"Access to /chat granted for session_id {session_id} (User ID: {permanent_user_id}). Rendering chat page.")
-    # We can also pass user's permanent ID and name to the template if helpful for frontend
-    user_name = ""
-    for uname, udata in users_data.items():
-        if udata.get("permanent_id") == permanent_user_id:
-            user_name = uname
-            break
-
-    return templates.TemplateResponse("chat.html", {"request": request, "session_id": session_id, "permanent_user_id": permanent_user_id, "user_name": user_name})
-
-
-# --- HTTP Endpoint for Login/Registration (POST) ---
-# This route handles the submission from the login form.
+# --- HTTP Endpoint for Login (POST) ---
 @app.post("/login")
 async def login_or_register(login_request: LoginRequest):
     username = login_request.username
@@ -388,17 +362,48 @@ async def login_or_register(login_request: LoginRequest):
             return JSONResponse(status_code=401, content={"detail": "Incorrect username or password."})
         else:
             # User does NOT exist, create a new user
-            print(f"User '{username}' not found. Registering new user...")
-            permanent_user_id = create_user(username, password) # Create and save user
-            print(f"Registration successful for user '{username}' with permanent ID {permanent_user_id}.")
-
+            return JSONResponse(status_code=401, content={"detail": "User does not exist."})
 
     # User exists and credentials are valid (or new user just created). Establish a session.
     # Generate a temporary session ID for this login session.
     session_id = generate_session_id()
-    # Map the session ID to the user's permanent ID in our in-memory dictionary
+
+    # --- NEW: Handle existing active sessions ---
+    # Check if this user already has an active session
+    existing_session_id = None
+    for s_id, u_id in active_sessions.items():
+        if u_id == permanent_user_id:
+            existing_session_id = s_id
+            break # Found the existing session
+
+    if existing_session_id:
+        print(f"User {username} (Permanent ID: {permanent_user_id}) already has an active session {existing_session_id}.  Terminating old session.")
+        # --- NEW: Terminate the old session ---
+        # 1. Remove the session from active_sessions
+
+        # 2. (IMPORTANT) Disconnect the WebSocket for the old session
+        # If they are *currently connected* via WebSocket
+        if existing_session_id in manager.active_players:
+            print(f"User {username} had active WebSocket connection, disconnecting it.")
+
+            # --- Send a message to the old client BEFORE disconnecting ---
+            try:
+                old_websocket = manager.active_players[existing_session_id].websocket
+                await old_websocket.send_json({"type": "session_terminated", "message": "Your session has been terminated due to a new login."})
+            except Exception as e:
+                print(f"Error sending session terminated message to old client: {e}")
+
+            await manager.disconnect(existing_session_id) # Disconnect their active websocket
+
+        del active_sessions[existing_session_id]
+
+        # --- Save active sessions to file immediately after terminating old session. ---
+        save_active_sessions()
+
+    # Map the new session ID to the user's permanent ID in our in-memory dictionary
     active_sessions[session_id] = permanent_user_id
-    # --- NEW: Save the updated active sessions to the file ---
+
+    # Save the updated active sessions to the file
     save_active_sessions()
     print(f"Session {session_id} created for user {username} (Permanent ID: {permanent_user_id}). Saved active sessions.")
 
@@ -406,19 +411,85 @@ async def login_or_register(login_request: LoginRequest):
     # Return the session ID to the client. Frontend JS will use this for WebSocket connection.
     return JSONResponse(content={"session_id": session_id})
 
-# This route will return a list of currently connected users (WebSocket connections) as JSON.
-@app.get("/users", response_class=JSONResponse) # Changed path from "/players" to "/users"
-async def get_active_users_list(): # Renamed function
+
+@app.get("/registration", response_class=HTMLResponse)
+async def get_register_page(request: Request):
+    # Ideally, here you'd check for a valid session cookie. If found,
+    # redirect directly to /chat. For simplicity, always serve login page for now.
+    return templates.TemplateResponse("registration.html", {"request": request})
+
+
+# --- HTTP Endpoint for Registration (POST) ---
+@app.post("/registration")
+async def register_user(login_request: LoginRequest):
+    username = login_request.username
+    password = login_request.password
+
+    if not username or not password:
+        return JSONResponse(status_code=400, content={"detail": "Username and password cannot be empty."})
+
+    if username in users_data:
+        print(f"Registration failed: User '{username}' already exists.")
+        return JSONResponse(status_code=409, content={"detail": "Username already exists."})  # 409 Conflict
+
+    # User does NOT exist, create a new user
+    print(f"Registering new user '{username}'...")
+    permanent_user_id = create_user(username, password)  # Create and save user
     
+    session_id = generate_session_id()
+    
+    # Map the new session ID to the user's permanent ID in our in-memory dictionary
+    active_sessions[session_id] = permanent_user_id
+
+    # Save the updated active sessions to the file
+    save_active_sessions()
+    print(f"Session {session_id} created for user {username} (Permanent ID: {permanent_user_id}). Saved active sessions.")
+    
+    print(f"Registration successful for user '{username}' with permanent ID {permanent_user_id}.")
+
+    # Return the session ID to the client. Frontend JS will use this for WebSocket connection.
+    return JSONResponse(content={"session_id": session_id})
+
+
+# --- HTTP Endpoint for Chat Page ---
+# Accessing "/chat" serves the chat.html page, but REQUIRES a valid session_id.
+@app.get("/chat", response_class=HTMLResponse)
+async def get_chat_page(request: Request):
+    # Get session_id from query parameter (as sent by login.html redirect)
+    session_id = request.query_params.get("session_id")
+
+    permanent_user_id = get_user_id_from_session_id(session_id)
+
+    if not session_id or not permanent_user_id:
+        # If session_id is missing, invalid, or not in our active_sessions
+        print(f"Access to /chat denied: Invalid or missing session_id: {session_id}. Redirecting to login.")
+        return RedirectResponse(url="/login", status_code=302) # 302 Found (Temporary Redirect)
+
+
+    # If session ID is valid and found in active_sessions, render the chat page.
+    # Pass the session_id to the template so the frontend JS knows how to connect to WebSocket.
+    print(f"Access to /chat granted for session_id {session_id} (User ID: {permanent_user_id}). Rendering chat page.")
+    # We can also pass user's permanent ID and name to the template if helpful for frontend
+    user_name = ""
+    for uname, udata in users_data.items():
+        if udata.get("permanent_id") == permanent_user_id:
+            user_name = uname
+            break
+
+    return templates.TemplateResponse("chat.html", {"request": request, "session_id": session_id, "permanent_user_id": permanent_user_id, "user_name": user_name})
+
+# --- HTTP Endpoint for Connected users list (GET) ---
+@app.get("/users", response_class=JSONResponse)
+async def get_active_users_list():
+
     """Returns a list of currently connected users with their permanent IDs and names."""
     active_connected_users_data = manager.get_active_players_data()
     print(f"Received request for active users list. Currently {len(active_connected_users_data)} active WebSocket connections.")
 
     return active_connected_users_data # This will return a list: [{"permanent_user_id": "...", "name": "..."}, ...]
 
+
 # --- WebSocket Endpoint ---
-# Handles incoming WebSocket connection requests at "/ws".
-# REQUIRES a valid session_id query parameter for authorization.
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket, session_id: str = None): # Expect session_id as query param
     print(f"Attempting WebSocket connection for session_id: {session_id}...")
@@ -456,17 +527,15 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str = None): # Ex
             # Wait for the next message from this client. Expecting JSON for actions in a real game.
             # For now, still accepting text for chat messages.
             data = await websocket.receive_text()
-            # print(f"Received message from session {player.session_id} ('{player.name}'): {data}")
 
-            # Process incoming message - for now, treat as chat
             message_text = data.strip()
-            if message_text: # Only process non-empty messages
+            if message_text:
                 chat_message = {
                     "type": "chat_message",
-                    "permanent_user_id": player.permanent_user_id, # Use permanent ID for message source
-                    "sender": player.name,     # Use the user's name
-                    "text": message_text,      # Message content
-                    "timestamp": time.time() # Add a timestamp
+                    "permanent_user_id": player.permanent_user_id,
+                    "sender": player.name,
+                    "text": message_text,
+                    "timestamp": time.time()
                 }
 
                 chat_history.append(chat_message)
@@ -479,10 +548,8 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str = None): # Ex
 
     except (WebSocketDisconnect, websockets.exceptions.ConnectionClosedOK, websockets.exceptions.ConnectionClosedError) as e:
         # Handle player disconnection from WebSocket.
-        # The session remains active unless explicitly logged out.
         disconnected_session_id = player.session_id if 'player' in locals() else session_id
 
-        # Use manager.disconnect to remove the WebSocket connection from active_players
         if disconnected_session_id in manager.active_players:
             print(f"Session {disconnected_session_id} ('{manager.active_players[disconnected_session_id].name}') disconnected from WebSocket: {e}")
             await manager.disconnect(disconnected_session_id)
@@ -491,33 +558,27 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str = None): # Ex
 
 
     except Exception as e:
-        # Handle any other unexpected errors specific to this connection.
         session_id_info = player.session_id if 'player' in locals() and player else session_id
         player_name_info = player.name if 'player' in locals() and player else "N/A"
         print(f"Unexpected error in WebSocket connection for session {session_id_info} ('{player_name_info}'): {e}")
         traceback.print_exc()
 
-        # Attempt to inform the client
         if 'player' in locals() and player and player.websocket:
             try:
                 error_msg = {"type": "server_error", "message": "An unexpected server error occurred with your connection."}
                 await player.websocket.send_json(error_msg)
             except Exception:
-                pass # Ignore errors while trying to send the error message
+                pass
 
-        # Disconnect the player's WebSocket connection
         if 'player' in locals() and player and player.session_id in manager.active_players:
             await manager.disconnect(player.session_id)
-        else: # If error happened before player object was fully managed
+        else:
             if 'websocket' in locals():
                 try:
-                    await websocket.close(code=1011) # 1011 means Internal Error
+                    await websocket.close(code=1011)
                 except Exception:
                     pass
 
-        # Inform other players about the issue (optional)
-        # Be careful not to broadcast sensitive info from the error
-        # We can use the permanent user ID if available
         permanent_id_info = player.permanent_user_id if 'player' in locals() and player else "N/A"
         await manager.broadcast_json({"type": "player_error", "permanent_user_id": permanent_id_info, "name": player_name_info, "message": f"An error occurred with {player_name_info}'s connection."})
 

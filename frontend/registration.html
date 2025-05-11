@@ -4,41 +4,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login or Register</title>
-    <link rel="stylesheet" href="{{ url_for('static', path='/css/login_style.css') }}">
+    <title>Register</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/registration_style.css') }}">
 </head>
 
 <body>
     <div class="login-container">
-        <h1>Login</h1>
-        <form id="loginForm" class="login-form">
+        <h1>Registration</h1>
+        <form id="registerForm" class="login-form">
             <label for="username">Username:</label>
             <input type="text" id="username" required>
 
             <label for="password">Password:</label>
             <input type="password" id="password" required>
 
-            <button type="submit">Sign in</button>
+            <button type="submit">Sign up</button>
         </form>
-        <button class="redirect-to-registration-button" onclick="window.location.href='/registration'">
-            Go to Registration page
-        </button>
+        <button class="redirect-to-login-button" onclick="window.location.href='/login'">Go to Login page</button>
         <div id="error-message"></div>
     </div>
 
     <script>
-        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
         const usernameInput = document.getElementById('username');
         const passwordInput = document.getElementById('password');
         const errorMessageDiv = document.getElementById('error-message');
 
-        loginForm.addEventListener('submit', async function (event) {
+        registerForm.addEventListener('submit', async function (event) {
             event.preventDefault();
 
             const username = usernameInput.value;
             const password = passwordInput.value;
 
-            const response = await fetch('/login', {
+            const response = await fetch('/registration', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -56,8 +54,8 @@
             } else {
                 // Handle errors from the backend (e.g., invalid credentials, registration failed)
                 const errorData = await response.json();
-                errorMessageDiv.textContent = errorData.detail || 'Login/Registration failed.';
-                console.error('Login failed:', errorData);
+                errorMessageDiv.textContent = errorData.detail || 'Registration failed.';
+                console.error('Registration failed:', errorData);
             }
         });
     </script>
