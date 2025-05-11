@@ -29,7 +29,8 @@ Web platform for board games. The main idea is to develop a ready-made base for 
 ### Security:
 - [ ] Implement cookies to avoid user session compromise.
 - [x] Allow only one active session per user.
-        (if user_id is already in active_sessions -> revoke the first session and create a new one)
+    - [x] Only one user can be logged-in using the same credentials.
+    - [x] Only one tab can be used with the same session id.
 - [ ] ---
 
 ## Contribution

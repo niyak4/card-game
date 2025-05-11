@@ -17,6 +17,11 @@
             font-weight: bold;
         }
 
+        #player-data {
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
         #messages {
             border: 1px solid #ccc;
             height: 300px;
@@ -79,13 +84,13 @@
 <body>
     <h1>WebSocket Chat Test</h1>
 
-    <div id="status">
-        Your ID: <span id="playerIdDisplay">{{ permanent_user_id }}</span> | Your Name: <span id="playerNameDisplay">{{
-            user_name }}</span>
+    <div id="status"></div>
+
+    <div id="player-data">
+        Your ID: <span id="playerIdDisplay">{{ permanent_user_id }}</span> | Your Name: <span id="playerNameDisplay">{{user_name }}</span>
     </div>
 
     <div id="messages">
-        <!-- Messages from the server and other players will appear here -->
         <p class="system-message">Connecting to server...</p>
     </div>
 

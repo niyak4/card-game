@@ -33,5 +33,33 @@
         "sender": "1",
         "text": "фыв",
         "timestamp": 1746974692.2001185
+    },
+    {
+        "type": "chat_message",
+        "permanent_user_id": "user_6cy7w525vo",
+        "sender": "1",
+        "text": "privet",
+        "timestamp": 1746979260.1775784
+    },
+    {
+        "type": "chat_message",
+        "permanent_user_id": "user_2vgdbzvq70",
+        "sender": "Zlapka",
+        "text": "Хеловкосійопусі",
+        "timestamp": 1746979276.8119168
+    },
+    {
+        "type": "chat_message",
+        "permanent_user_id": "user_6cy7w525vo",
+        "sender": "1",
+        "text": "сійо",
+        "timestamp": 1746988860.7337518
+    },
+    {
+        "type": "chat_message",
+        "permanent_user_id": "user_yqxrxkvoin",
+        "sender": "333",
+        "text": "ф",
+        "timestamp": 1747003575.6811426
     }
 ]
