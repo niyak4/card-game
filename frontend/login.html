@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login or Register</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 80vh;
+            background-color: #f4f4f4;
+        }
+
+        .login-container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            text-align: center;
+        }
+
+        .login-container h1 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .login-form label {
+            display: block;
+            margin-bottom: 5px;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        .login-form input[type="text"],
+        .login-form input[type="password"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .login-form button {
+            width: 100%;
+            padding: 10px;
+            background-color: #5cb85c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .login-form button:hover {
+            background-color: #4cae4c;
+        }
+
+        #error-message {
+            color: red;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-container">
+        <h1>Login or Register</h1>
+        <form id="loginForm" class="login-form">
+            <label for="username">Username:</label>
+            <input type="text" id="username" required>
+
+            <label for="password">Password:</label>
+            <input type="password" id="password" required>
+
+            <button type="submit">Submit</button>
+        </form>
+        <div id="error-message"></div>
+    </div>
+
+    <script>
+        // Simple JavaScript to handle form submission
+        const loginForm = document.getElementById('loginForm');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const errorMessageDiv = document.getElementById('error-message');
+
+        loginForm.addEventListener('submit', async function (event) {
+            event.preventDefault(); // Prevent default form submission
+
+            const username = usernameInput.value;
+            const password = passwordInput.value; // Note: Sending password in plain text for this example
+
+            // Send login/registration request to the backend
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username: username, password: password })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                // If login/registration was successful, the backend returns a session_id
+                const sessionId = data.session_id;
+
+                // Store the session ID (e.g., in localStorage) and redirect to the chat page
+                localStorage.setItem('chat_session_id', sessionId);
+
+                // Redirect to the chat page, including the session_id as a query parameter
+                window.location.href = '/chat?session_id=' + encodeURIComponent(sessionId); // encodeURIComponent is good practice
+
+            } else {
+                // Handle errors from the backend (e.g., invalid credentials, registration failed)
+                // For this simple example, the backend always succeeds if username is non-empty,
+                // but in a real app, handle different error statuses/messages.
+                const errorData = await response.json(); // Assuming backend sends error details in JSON
+                errorMessageDiv.textContent = errorData.detail || 'Login/Registration failed.';
+                console.error('Login/Registration failed:', errorData);
+            }
+        });
+    </script>
+</body>
+
+</html>

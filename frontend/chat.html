@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Chat Test</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+            line-height: 1.4;
+        }
+
+        #status {
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        #messages {
+            border: 1px solid #ccc;
+            height: 300px;
+            overflow-y: scroll;
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: #f9f9f9;
+        }
+
+        #messages p {
+            margin: 5px 0;
+            padding: 5px;
+            border-bottom: 1px dotted #eee;
+            word-wrap: break-word;
+        }
+
+        /* Allow long words to break */
+        #messages p:last-child {
+            border-bottom: none;
+        }
+
+        .input-area {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .input-area input {
+            flex-grow: 1;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .input-area button {
+            padding: 8px 15px;
+            background-color: #5cb85c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .input-area button:hover {
+            background-color: #4cae4c;
+        }
+
+        .message-sender {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .system-message {
+            font-style: italic;
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>WebSocket Chat Test</h1>
+
+    <div id="status">
+        Your ID: <span id="playerIdDisplay">{{ permanent_user_id }}</span> | Your Name: <span id="playerNameDisplay">{{
+            user_name }}</span>
+    </div>
+
+    <div id="messages">
+        <!-- Messages from the server and other players will appear here -->
+        <p class="system-message">Connecting to server...</p>
+    </div>
+
+    <div class="input-area">
+        <input type="text" id="messageInput" placeholder="Type your message here..." disabled>
+        <button id="sendButton" disabled>Send</button>
+    </div>
+
+    <script src="{{ url_for('static', path='/js/chat.js') }}"></script>
+</body>
+
+</html>
