@@ -6,6 +6,7 @@ import string
 import time
 from typing import List, Dict, Any, Optional
 
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request, Form
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
@@ -19,22 +20,15 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 FRONTEND_DIR = os.path.join(BASE_DIR, "../frontend")
 
 # Define paths for data files
-DATABASE_DIR = os.path.join(BASE_DIR, "database") # Define path to the new database directory
-CHAT_HISTORY_FILE = os.path.join(DATABASE_DIR, "chat_history.json") # Use DATABASE_DIR
-USERS_FILE = os.path.join(DATABASE_DIR, "users.json")         # Use DATABASE_DIR
-SESSIONS_FILE = os.path.join(DATABASE_DIR, "active_sessions.json") # Use DATABASE_DIR
-
-
-app = FastAPI()
-
-app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
-templates = Jinja2Templates(directory=FRONTEND_DIR)
+DATABASE_DIR = os.path.join(BASE_DIR, "database")
+CHAT_HISTORY_FILE = os.path.join(DATABASE_DIR, "chat_history.json")
+USERS_FILE = os.path.join(DATABASE_DIR, "users.json")
+SESSIONS_FILE = os.path.join(DATABASE_DIR, "active_sessions.json")
 
 # --- Data Storage (in-memory) ---
 chat_history: List[Dict[str, Any]] = []
 users_data: Dict[str, Dict[str, str]] = {}
-# active_sessions will now also be loaded from/saved to a file
-active_sessions: Dict[str, str] = {} # {session_id: permanent_user_id}
+active_sessions: Dict[str, str] = {}
 
 
 # --- Persistence Functions ---
@@ -61,6 +55,7 @@ def load_data(filepath: str, default_data: Any):
         print(f"File not found at {filepath}. Starting with default data.")
         return default_data
 
+
 def save_data(filepath: str, data: Any):
     """Generic function to save data to a JSON file."""
     try:
@@ -73,20 +68,40 @@ def save_data(filepath: str, data: Any):
         print(f"An error occurred while saving {filepath}: {e}")
         traceback.print_exc() # Log saving error details
 
+
 # Load data when the application starts
-@app.on_event("startup")
-async def startup_event():
-    print("App startup event: Loading data...")
+@asynccontextmanager
+async def lifespan(app: FastAPI): # Renamed and added app argument type hint
+    """
+    Handles application startup and shutdown events.
+    Loads data on startup.
+    """
+    print("App lifespan event: Loading data on startup...")
     global chat_history, users_data, active_sessions
     chat_history = load_data(CHAT_HISTORY_FILE, [])
     users_data = load_data(USERS_FILE, {})
-    # --- NEW: Load active sessions on startup ---
     active_sessions = load_data(SESSIONS_FILE, {})
     print(f"Loaded {len(active_sessions)} active sessions from {SESSIONS_FILE}")
 
-    # TODO: Add logic to clean up expired sessions if they had a timeout
+    # --- Startup Logic Ends ---
+    # The 'yield' statement is the separator between startup and shutdown logic.
+    # The application will run while inside the 'async with' block before 'yield'.
+    yield
+    # --- Shutdown Logic Starts (Optional) ---
+    # Code after 'yield' will be executed when the application is shutting down.
+    # This is where you would clean up resources, like closing database connections.
+    # For file-based storage, explicit saving on shutdown might be redundant
+    # if you already save on every change, but could be added here as a final save.
+    print("App lifespan event: Application shutting down.")
+    # save_chat_history() # Optional final saves
+    # save_users_data()
+    # save_active_sessions()
+    # print("App lifespan event: Data saved on shutdown.")
 
-    print("App startup complete.")
+app = FastAPI(lifespan=lifespan)
+
+app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
+templates = Jinja2Templates(directory=FRONTEND_DIR)
 
 # Save chat history function now just calls generic save
 def save_chat_history():
